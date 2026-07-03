@@ -1,19 +1,36 @@
 import type { TranslationLeaf } from "./translations";
 
+/** One displayed opening-hours row: a day range on the left, hours on the right. */
+export interface OpeningRow {
+  /** Day label, e.g. "Po–St" / "Mon–Wed" or "Každý den" / "Every day". */
+  days: TranslationLeaf;
+  /** Hours label, e.g. "10:00–24:00", or a closed/coming-soon label. */
+  hours: TranslationLeaf;
+  /** When true the branch is closed on these days (rendered muted). */
+  closed?: boolean;
+}
+
+/** Machine-readable opening-hours block for JSON-LD (24h "HH:MM"). */
+export interface OpeningSpec {
+  /** schema.org day names, e.g. ["Monday", "Tuesday"]. */
+  dayOfWeek: string[];
+  opens: string;
+  closes: string;
+}
+
 export interface Location {
   id: string;
   name: TranslationLeaf;
   address: string;
   district: TranslationLeaf;
   phone: string;
-  /** Opening hours placeholder – edit easily later. */
-  openingHours: TranslationLeaf;
+  /** Displayed opening hours as compact stacked day/hours rows. */
+  openingHours: OpeningRow[];
   /**
-   * Machine-readable opening hours for JSON-LD (24h "HH:MM"). Optional —
-   * when omitted, structured data falls back to the default 10:00–02:00.
-   * Set per-branch when a branch's hours differ (e.g. Žižkov 10:00–06:00).
+   * Machine-readable weekly opening hours for JSON-LD. Optional — omit for
+   * coming-soon branches. Normal weekly hours only (no holiday exceptions).
    */
-  hours?: { opens: string; closes: string };
+  hoursSpec?: OpeningSpec[];
   /** Google Maps directions URL (replace with the exact place URL later). */
   directionsUrl: string;
   /** Google review URL placeholder – replace with the exact "write review" link per branch. */
@@ -54,10 +71,15 @@ export const LOCATIONS: Location[] = [
     address: "Sokolovská 120/62, 186 00 Praha 8",
     district: { cs: "Karlín", en: "Karlín" },
     phone: PHONE,
-    openingHours: {
-      cs: "Po–Ne 10:00 – 02:00",
-      en: "Mon–Sun 10:00 – 02:00",
-    },
+    openingHours: [
+      { days: { cs: "Po–St", en: "Mon–Wed" }, hours: { cs: "10:00–24:00", en: "10:00–24:00" } },
+      { days: { cs: "Čt–So", en: "Thu–Sat" }, hours: { cs: "10:00–02:00", en: "10:00–02:00" } },
+      { days: { cs: "Ne", en: "Sun" }, hours: { cs: "Zavřeno", en: "Closed" }, closed: true },
+    ],
+    hoursSpec: [
+      { dayOfWeek: ["Monday", "Tuesday", "Wednesday"], opens: "10:00", closes: "00:00" },
+      { dayOfWeek: ["Thursday", "Friday", "Saturday"], opens: "10:00", closes: "02:00" },
+    ],
     directionsUrl:
       "https://www.google.com/maps/dir/?api=1&destination=Queen%27s+Kebab+Sokolovsk%C3%A1+120+Praha+8",
     reviewUrl:
@@ -79,10 +101,15 @@ export const LOCATIONS: Location[] = [
     address: "U Slavie 1527/3, 100 00 Praha 10",
     district: { cs: "Vršovice", en: "Vršovice" },
     phone: PHONE,
-    openingHours: {
-      cs: "Po–Ne 10:00 – 02:00",
-      en: "Mon–Sun 10:00 – 02:00",
-    },
+    openingHours: [
+      { days: { cs: "Po–St", en: "Mon–Wed" }, hours: { cs: "10:00–24:00", en: "10:00–24:00" } },
+      { days: { cs: "Čt–So", en: "Thu–Sat" }, hours: { cs: "10:00–02:00", en: "10:00–02:00" } },
+      { days: { cs: "Ne", en: "Sun" }, hours: { cs: "10:00–24:00", en: "10:00–24:00" } },
+    ],
+    hoursSpec: [
+      { dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Sunday"], opens: "10:00", closes: "00:00" },
+      { dayOfWeek: ["Thursday", "Friday", "Saturday"], opens: "10:00", closes: "02:00" },
+    ],
     directionsUrl:
       "https://www.google.com/maps/dir/?api=1&destination=Queen%27s+Kebab+U+Slavie+3+Praha+10",
     reviewUrl:
@@ -102,11 +129,24 @@ export const LOCATIONS: Location[] = [
     address: "Seifertova 33, 130 00 Praha 3",
     district: { cs: "Žižkov", en: "Žižkov" },
     phone: PHONE,
-    openingHours: {
-      cs: "Po–Ne 10:00–06:00",
-      en: "Mon–Sun 10:00–06:00",
-    },
-    hours: { opens: "10:00", closes: "06:00" },
+    openingHours: [
+      { days: { cs: "Každý den", en: "Every day" }, hours: { cs: "10:00–06:00", en: "10:00–06:00" } },
+    ],
+    hoursSpec: [
+      {
+        dayOfWeek: [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+          "Sunday",
+        ],
+        opens: "10:00",
+        closes: "06:00",
+      },
+    ],
     directionsUrl:
       "https://www.google.com/maps/dir/?api=1&destination=Queen%27s+Kebab+Seifertova+33+Praha+3",
     reviewUrl:
@@ -127,10 +167,9 @@ export const LOCATIONS: Location[] = [
     address: "Lodžská 399/29, 181 00 Praha 8",
     district: { cs: "Bohnice", en: "Bohnice" },
     phone: BOHNICE_PHONE,
-    openingHours: {
-      cs: "Po–Ne 10:00 – 23:00",
-      en: "Mon–Sun 10:00 – 23:00",
-    },
+    openingHours: [
+      { days: { cs: "Připravujeme", en: "Coming soon" }, hours: { cs: "", en: "" } },
+    ],
     directionsUrl:
       "https://www.google.com/maps/dir/?api=1&destination=Lod%C5%BEsk%C3%A1+399%2F29+Praha+8",
     reviewUrl:

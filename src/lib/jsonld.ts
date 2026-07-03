@@ -33,22 +33,16 @@ export function buildRestaurantJsonLd() {
       ...(coming
         ? {}
         : {
-            openingHoursSpecification: [
-              {
-                "@type": "OpeningHoursSpecification",
-                dayOfWeek: [
-                  "Monday",
-                  "Tuesday",
-                  "Wednesday",
-                  "Thursday",
-                  "Friday",
-                  "Saturday",
-                  "Sunday",
-                ],
-                opens: loc.hours?.opens ?? "10:00",
-                closes: loc.hours?.closes ?? "02:00",
-              },
-            ],
+            ...(loc.hoursSpec
+              ? {
+                  openingHoursSpecification: loc.hoursSpec.map((spec) => ({
+                    "@type": "OpeningHoursSpecification",
+                    dayOfWeek: spec.dayOfWeek,
+                    opens: spec.opens,
+                    closes: spec.closes,
+                  })),
+                }
+              : {}),
             aggregateRating: {
               "@type": "AggregateRating",
               ratingValue: GOOGLE_RATING.score,

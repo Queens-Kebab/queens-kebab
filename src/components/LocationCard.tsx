@@ -97,11 +97,32 @@ export function LocationCard({ location, index, selected = false, onToggle }: Pr
           </div>
           <div className="flex items-start gap-3">
             <Clock className="mt-0.5 h-4 w-4 shrink-0 text-brand-red" strokeWidth={1.75} />
-            <div>
+            <div className="min-w-0 flex-1">
               <dt className="text-[11px] uppercase tracking-wider text-white/55">
                 {t(translations.common.openingHours)}
               </dt>
-              <dd className="text-white/85">{t(location.openingHours)}</dd>
+              <dd className="mt-1 space-y-0.5">
+                {location.openingHours.map((row, i) => {
+                  const hours = t(row.hours);
+                  return (
+                    <div
+                      key={i}
+                      className="flex items-baseline justify-between gap-3 text-sm"
+                    >
+                      <span className="text-white/70">{t(row.days)}</span>
+                      {hours && (
+                        <span
+                          className={`tabular-nums font-medium ${
+                            row.closed ? "text-white/45" : "text-white/90"
+                          }`}
+                        >
+                          {hours}
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
+              </dd>
             </div>
           </div>
           <div className="flex items-start gap-3">
