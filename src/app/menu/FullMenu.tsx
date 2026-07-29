@@ -23,13 +23,21 @@ const sectionId = (cat: MenuCategoryId) => `cat-${cat}`;
 /** Both "back" buttons return to the landing page menu section. */
 const BACK_HREF = "/#menu";
 
+/**
+ * Whether a branch's *menu* is unavailable — independent from the branch
+ * itself being open. Falls back to `comingSoon` when `menuComingSoon` is
+ * unset, so branches without a special case behave as before.
+ */
+const isMenuComing = (loc: Location) =>
+  (loc.menuComingSoon ?? loc.comingSoon) === true;
+
 export function FullMenu() {
   const { t, lang } = useLanguage();
 
-  const firstActive = LOCATIONS.find((l) => !l.comingSoon) ?? LOCATIONS[0];
+  const firstActive = LOCATIONS.find((l) => !isMenuComing(l)) ?? LOCATIONS[0];
   const [branch, setBranch] = useState<Location>(firstActive);
   const [query, setQuery] = useState("");
-  const branchComing = branch.comingSoon === true;
+  const branchComing = isMenuComing(branch);
 
   // Menu for the selected branch (falls back to the full Karlín menu).
   const branchMenu: BranchMenu = useMemo(
@@ -136,7 +144,7 @@ export function FullMenu() {
         <div className="hide-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4 sm:mx-0 sm:flex-wrap sm:px-0">
           {LOCATIONS.map((loc) => {
             const isActive = branch.id === loc.id;
-            const coming = loc.comingSoon === true;
+            const coming = isMenuComing(loc);
             return (
               <button
                 key={loc.id}

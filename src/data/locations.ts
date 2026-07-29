@@ -59,10 +59,17 @@ export interface Location {
    *  - JSON-LD skips the branch
    */
   comingSoon?: boolean;
+  /**
+   * Independent from `comingSoon`: gates the /menu page's per-branch menu
+   * grid only. Defaults to `comingSoon` when omitted. Set explicitly when a
+   * branch is open for business (address/hours/order/contact all live) but
+   * its food menu hasn't been digitized yet.
+   */
+  menuComingSoon?: boolean;
 }
 
 const PHONE = "+420799022871";
-const BOHNICE_PHONE = "+420774668988";
+const BOHNICE_PHONE = "+420776172205";
 
 export const LOCATIONS: Location[] = [
   {
@@ -164,30 +171,49 @@ export const LOCATIONS: Location[] = [
   {
     id: "bohnice",
     name: { cs: "Queen's Kebab Bohnice", en: "Queen's Kebab Bohnice" },
-    address: "Lodžská 399/29, 181 00 Praha 8",
+    address: "Lodžská 399/26, 181 00 Praha 8",
     district: { cs: "Bohnice", en: "Bohnice" },
     phone: BOHNICE_PHONE,
     openingHours: [
-      { days: { cs: "Připravujeme", en: "Coming soon" }, hours: { cs: "", en: "" } },
+      { days: { cs: "Po–So", en: "Mon–Sat" }, hours: { cs: "10:00–22:00", en: "10:00–22:00" } },
+      { days: { cs: "Ne", en: "Sun" }, hours: { cs: "Zavřeno", en: "Closed" }, closed: true },
+    ],
+    hoursSpec: [
+      {
+        dayOfWeek: [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+        ],
+        opens: "10:00",
+        closes: "22:00",
+      },
     ],
     directionsUrl:
-      "https://www.google.com/maps/dir/?api=1&destination=Lod%C5%BEsk%C3%A1+399%2F29+Praha+8",
+      "https://www.google.com/maps/dir/?api=1&destination=Lod%C5%BEsk%C3%A1+399%2F26+Praha+8",
     reviewUrl:
       "https://search.google.com/local/writereview?placeid=REPLACE_WITH_PLACE_ID_BOHNICE",
     delivery: {
       wolt: null,
       bolt: null,
-      foodora: null,
+      foodora:
+        "https://www.foodora.cz/restaurant/s2yj/queens-kebab-and-pizza-s2yj?utm_campaign=google_reserve_place_order_action_CH-SEO_",
     },
     geo: { lat: 50.1289, lng: 14.4221 },
-    comingSoon: true,
+    image: "/images_optimized/pobocka-bohnice.webp",
+    // Branch is open (address/hours/order/contact live); the /menu page's
+    // per-branch dish grid isn't digitized yet, so keep it "Připravujeme".
+    menuComingSoon: true,
   },
 ];
 
 export const PRIMARY_PHONE_DISPLAY = "+420 799 022 871";
 export const PRIMARY_PHONE_TEL = PHONE;
 
-export const BOHNICE_PHONE_DISPLAY = "+420 774 668 988";
+export const BOHNICE_PHONE_DISPLAY = "+420 776 172 205";
 
 /** Convenience: branches that are actually open for service. */
 export const ACTIVE_LOCATIONS: Location[] = LOCATIONS.filter(

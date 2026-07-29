@@ -92,16 +92,14 @@ export function OrderButtons() {
           }`}
           aria-hidden={activeIsComing || undefined}
         >
-          {PLATFORMS.map((p) => {
+          {PLATFORMS.filter((p) => active.delivery[p.id]).map((p) => {
             const url = active.delivery[p.id];
-            const disabled = !url;
             return (
               <a
                 key={p.id}
                 href={url ?? "#order"}
-                target={url ? "_blank" : undefined}
-                rel={url ? "noopener noreferrer" : undefined}
-                aria-disabled={disabled || undefined}
+                target="_blank"
+                rel="noopener noreferrer"
                 tabIndex={activeIsComing ? -1 : undefined}
                 /*
                   Mobile padding stays at `p-5` (≈ 20 px). On md+ we bump
@@ -109,9 +107,7 @@ export function OrderButtons() {
                   desktop cards feel more spacious and premium without
                   resizing the mobile layout.
                 */
-                className={`relative flex min-h-[100px] items-center justify-between gap-4 overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br ${p.color} p-5 text-white shadow-card transition hover:shadow-glow md:min-h-[132px] md:p-6 lg:min-h-[150px] lg:p-7 ${
-                  disabled ? "opacity-50 grayscale" : "hover:-translate-y-0.5"
-                }`}
+                className={`relative flex min-h-[100px] items-center justify-between gap-4 overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br ${p.color} p-5 text-white shadow-card transition hover:shadow-glow hover:-translate-y-0.5 md:min-h-[132px] md:p-6 lg:min-h-[150px] lg:p-7`}
               >
                 <div className="relative z-10">
                   <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/80">
