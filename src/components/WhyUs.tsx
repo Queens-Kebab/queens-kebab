@@ -89,7 +89,7 @@ export function WhyUs() {
       */}
       <div
         ref={scrollerRef}
-        className="hide-scrollbar -mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:px-0 lg:grid lg:grid-cols-4 lg:gap-4 lg:overflow-visible lg:pb-0"
+        className="hide-scrollbar -mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 scroll-pl-4 sm:mx-0 sm:px-0 sm:scroll-pl-0 lg:grid lg:grid-cols-4 lg:gap-4 lg:overflow-visible lg:pb-0"
       >
         {translations.why.items.map((item, idx) => {
           const Icon = ICONS[idx];
@@ -100,9 +100,11 @@ export function WhyUs() {
               type="button"
               onClick={() => open(idx)}
               aria-label={t(item.title)}
-              className="group card relative flex min-h-[300px] min-w-[84%] shrink-0 snap-start flex-col justify-end gap-3 overflow-hidden p-6 text-left transition hover:-translate-y-1 hover:border-white/15 sm:min-h-[280px] sm:min-w-[46%] lg:min-h-[260px] lg:min-w-0 lg:shrink"
+              className="group card relative flex h-[300px] w-[85%] shrink-0 snap-start flex-col justify-end gap-3 overflow-hidden p-6 text-left transition hover:-translate-y-1 hover:border-white/15 sm:h-[280px] sm:w-[46%] lg:h-auto lg:w-auto lg:min-h-[260px] lg:min-w-0 lg:shrink"
             >
-              {/* Background photo — visible but darkened so text stays readable */}
+              {/* Background photo — clearer near the top, strongly darkened
+                  only near the bottom where the title/description sit, so
+                  the photo reads clearly without washing out the text. */}
               {photo && (
                 <div aria-hidden className="absolute inset-0 z-0 overflow-hidden rounded-2xl">
                   <Image
@@ -110,9 +112,9 @@ export function WhyUs() {
                     alt=""
                     fill
                     sizes="(max-width: 768px) 80vw, 25vw"
-                    className="object-cover opacity-40 transition-opacity duration-500 group-hover:opacity-55"
+                    className="object-cover opacity-60 transition-opacity duration-500 group-hover:opacity-72"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-ink-950/94 via-ink-950/82 to-ink-950/62" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-ink-950/96 via-ink-950/45 to-ink-950/8" />
                 </div>
               )}
 

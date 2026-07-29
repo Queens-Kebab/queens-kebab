@@ -122,8 +122,8 @@ export const translations = {
       {
         title: { cs: "Čtyři místa v Praze", en: "Four spots in Prague" },
         body: {
-          cs: "Karlín, Vršovice, Žižkov a brzy také Bohnice. Otevřeno každý den.",
-          en: "Karlín, Vršovice, Žižkov and Bohnice coming soon. Open every day.",
+          cs: "Karlín, Vršovice, Žižkov a Bohnice. Otevřeno každý den.",
+          en: "Karlín, Vršovice, Žižkov and Bohnice. Open every day.",
         },
       },
       {
@@ -185,6 +185,12 @@ export const translations = {
     drinks: { cs: "Nápoje", en: "Drinks" },
     sides: { cs: "Doplňky", en: "Sides" },
     all: { cs: "Vše", en: "All" },
+    // Bohnice-only categories
+    "kebab-gemuse": { cs: "Kebab Gemüse", en: "Kebab Gemüse" },
+    burger: { cs: "Burger", en: "Burgers" },
+    veggie: { cs: "Vegetariánské", en: "Vegetarian" },
+    fries: { cs: "Hranolky", en: "Fries" },
+    pizza32: { cs: "Pizza 32 cm", en: "Pizza 32 cm" },
   },
   order: {
     wolt: { cs: "Objednat na Wolt", en: "Order on Wolt" },

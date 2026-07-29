@@ -175,8 +175,7 @@ export const LOCATIONS: Location[] = [
     district: { cs: "Bohnice", en: "Bohnice" },
     phone: BOHNICE_PHONE,
     openingHours: [
-      { days: { cs: "Po–So", en: "Mon–Sat" }, hours: { cs: "10:00–22:00", en: "10:00–22:00" } },
-      { days: { cs: "Ne", en: "Sun" }, hours: { cs: "Zavřeno", en: "Closed" }, closed: true },
+      { days: { cs: "Po–Ne", en: "Mon–Sun" }, hours: { cs: "10:00–22:00", en: "10:00–22:00" } },
     ],
     hoursSpec: [
       {
@@ -187,6 +186,7 @@ export const LOCATIONS: Location[] = [
           "Thursday",
           "Friday",
           "Saturday",
+          "Sunday",
         ],
         opens: "10:00",
         closes: "22:00",
@@ -204,9 +204,6 @@ export const LOCATIONS: Location[] = [
     },
     geo: { lat: 50.1289, lng: 14.4221 },
     image: "/images_optimized/pobocka-bohnice.webp",
-    // Branch is open (address/hours/order/contact live); the /menu page's
-    // per-branch dish grid isn't digitized yet, so keep it "Připravujeme".
-    menuComingSoon: true,
   },
 ];
 

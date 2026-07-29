@@ -14,6 +14,8 @@ interface Props {
   selected?: boolean;
   /** Toggle this card's photo overlay (parent enforces single-open). */
   onToggle?: () => void;
+  /** Extra classes appended to the root article (e.g. `h-full` in a carousel). */
+  className?: string;
 }
 
 /** Format an E.164-ish phone for display (e.g. +420774668988 → +420 774 668 988). */
@@ -23,7 +25,13 @@ function formatPhone(raw: string): string {
   return match ? `${match[1]} ${match[2]} ${match[3]} ${match[4]}` : raw;
 }
 
-export function LocationCard({ location, index, selected = false, onToggle }: Props) {
+export function LocationCard({
+  location,
+  index,
+  selected = false,
+  onToggle,
+  className = "",
+}: Props) {
   const { t } = useLanguage();
   const coming = location.comingSoon === true;
   const hasPhoto = !coming && Boolean(location.image);
@@ -43,7 +51,7 @@ export function LocationCard({ location, index, selected = false, onToggle }: Pr
         coming
           ? "border-white/10"
           : "hover:-translate-y-1 hover:border-white/15 hover:shadow-glow"
-      } ${hasPhoto ? "cursor-pointer" : ""}`}
+      } ${hasPhoto ? "cursor-pointer" : ""} ${className}`}
       aria-disabled={coming || undefined}
     >
       {/* Branch photo — visible by default (darkened), a touch brighter on hover */}
