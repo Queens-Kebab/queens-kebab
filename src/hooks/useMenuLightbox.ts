@@ -26,16 +26,27 @@ export function useMenuLightbox(items: MenuItem[]) {
   }, [imaged]);
 
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+  /**
+   * The exact bytes the clicked card already painted (its resolved
+   * `currentSrc`). The lightbox shows this instantly as a backdrop, so the
+   * overlay is never blank while the larger variant decodes.
+   */
+  const [poster, setPoster] = useState<string | null>(null);
 
   const openFor = useCallback(
-    (id: string) => {
+    (id: string, posterSrc?: string) => {
       const idx = indexById.get(id);
-      if (idx !== undefined) setOpenIndex(idx);
+      if (idx === undefined) return;
+      setPoster(posterSrc ?? null);
+      setOpenIndex(idx);
     },
     [indexById],
   );
 
-  const close = useCallback(() => setOpenIndex(null), []);
+  const close = useCallback(() => {
+    setOpenIndex(null);
+    setPoster(null);
+  }, []);
   const prev = useCallback(
     () =>
       setOpenIndex((i) =>
@@ -48,5 +59,5 @@ export function useMenuLightbox(items: MenuItem[]) {
     [images.length],
   );
 
-  return { images, openIndex, openFor, close, prev, next };
+  return { images, poster, openIndex, openFor, close, prev, next };
 }

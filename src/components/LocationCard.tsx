@@ -65,20 +65,20 @@ export function LocationCard({
             className="object-cover opacity-45 transition-opacity duration-500 group-hover:opacity-60"
           />
           {/*
-            Readability without flattening the photo: a light overall scrim
-            keeps the exterior shot visible, while a bottom-weighted gradient
-            concentrates the contrast behind the address / hours / phone
-            block so those values stay crisp.
+            Two layers, deliberately unequal:
 
-            Only the flat scrim is eased (40 -> 35), which lifts image
-            visibility by ~8%. The bottom-weighted gradient is deliberately
-            left alone so contrast behind the text is unchanged.
+            1. A light flat scrim (25%) that no longer flattens the whole
+               photo — the storefront stays clearly recognizable.
+            2. A steeply graded bottom-weighted gradient: subtle at the top
+               (35%), medium through the middle (70%), near-solid behind the
+               address / hours / phone / buttons (95%). Contrast is spent
+               where the text actually sits instead of over the image.
 
             NOTE: opacity suffixes must be multiples of 5 — Tailwind's default
             opacity scale has no /36 or /88, so those silently emit no CSS.
           */}
-          <div className="absolute inset-0 bg-ink-950/35" />
-          <div className="absolute inset-0 bg-gradient-to-t from-ink-950/95 via-ink-950/90 to-ink-950/55" />
+          <div className="absolute inset-0 bg-ink-950/25" />
+          <div className="absolute inset-0 bg-gradient-to-t from-ink-950/95 via-ink-950/70 to-ink-950/35" />
         </div>
       )}
 

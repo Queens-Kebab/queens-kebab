@@ -75,6 +75,19 @@ export function FullMenu() {
   const displayedItems = searching ? searchResults : branchMenu.items;
   const lb = useMenuLightbox(displayedItems);
 
+  /**
+   * Group items by category once per branch instead of re-filtering on every
+   * render. Scroll-spy calls setActiveCat as the user scrolls, so without this
+   * every scroll transition re-ran one filter pass per category.
+   */
+  const sections = useMemo(
+    () =>
+      branchCategories
+        .map((cat) => ({ cat, items: getByCategory(cat, branchMenu.items) }))
+        .filter((s) => s.items.length > 0),
+    [branchCategories, branchMenu.items],
+  );
+
   // Scroll-spy: highlight the category pill for the section in view.
   useEffect(() => {
     if (branchComing || searching) return;
@@ -257,17 +270,15 @@ export function FullMenu() {
                   <DishCard
                     key={item.id}
                     item={item}
-                    priority={idx < 6}
-                    onImageClick={() => lb.openFor(item.id)}
+                    priority={idx < 2}
+                    onImageClick={(poster) => lb.openFor(item.id, poster)}
                   />
                 ))}
               </div>
             )
           ) : (
             <div className="space-y-14">
-              {branchCategories.map((cat, catIdx) => {
-                const items = getByCategory(cat, branchMenu.items);
-                if (items.length === 0) return null;
+              {sections.map(({ cat, items }, catIdx) => {
                 return (
                   <section
                     key={cat}
@@ -288,8 +299,15 @@ export function FullMenu() {
                         <DishCard
                           key={item.id}
                           item={item}
-                          priority={catIdx === 0 && idx < 4}
-                          onImageClick={() => lb.openFor(item.id)}
+                          /*
+                            Above-the-fold only. Two is the safe ceiling: the
+                            mobile grid is single-column (1–2 visible) and the
+                            desktop grid shows 3 — the third is already in view
+                            so native lazy loading fetches it immediately
+                            anyway, without competing for early bandwidth.
+                          */
+                          priority={catIdx === 0 && idx < 2}
+                          onImageClick={(poster) => lb.openFor(item.id, poster)}
                         />
                       ))}
                     </div>
@@ -336,6 +354,7 @@ export function FullMenu() {
         <Lightbox
           images={lb.images}
           index={lb.openIndex}
+          poster={lb.poster}
           onClose={lb.close}
           onPrev={lb.prev}
           onNext={lb.next}

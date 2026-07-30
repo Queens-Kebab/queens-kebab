@@ -139,7 +139,9 @@ export function MenuPreview() {
               <DishCard
                 item={item}
                 priority={idx < 2}
-                onImageClick={() => lb.openFor(item.id)}
+                /* Carousel cards, not grid cards: 82% / 48% / 32% / 28%. */
+                sizes="(min-width: 1280px) 28vw, (min-width: 1024px) 32vw, (min-width: 640px) 48vw, 82vw"
+                onImageClick={(poster) => lb.openFor(item.id, poster)}
               />
             </div>
           ))}
@@ -163,6 +165,7 @@ export function MenuPreview() {
         <Lightbox
           images={lb.images}
           index={lb.openIndex}
+          poster={lb.poster}
           onClose={lb.close}
           onPrev={lb.prev}
           onNext={lb.next}

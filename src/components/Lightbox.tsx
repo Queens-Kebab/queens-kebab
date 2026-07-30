@@ -1,13 +1,27 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
-import { useImagePreload } from "@/hooks/useImagePreload";
 import type { GalleryImage } from "@/data/gallery";
+
+/**
+ * Shared by the visible slide and the hidden neighbour warm-ups — they must
+ * match exactly, otherwise the browser picks a different srcset candidate and
+ * the "preload" turns into a second download.
+ */
+const FULL_SIZES = "100vw";
+const QUALITY = 80;
 
 interface LightboxProps {
   images: GalleryImage[];
   index: number;
+  /**
+   * Bytes the opening card already painted. Shown immediately underneath the
+   * full-size slide so the overlay is never blank while the larger variant
+   * decodes. Cleared once the user navigates to another slide.
+   */
+  poster?: string | null;
   onClose: () => void;
   onPrev: () => void;
   onNext: () => void;
@@ -21,10 +35,12 @@ interface LightboxProps {
  *  - touch swipe left/right
  *  - body-scroll lock + neighbour preloading for instant navigation
  */
-export function Lightbox({ images, index, onClose, onPrev, onNext }: LightboxProps) {
+export function Lightbox({ images, index, poster, onClose, onPrev, onNext }: LightboxProps) {
   const img = images[index];
   const [failed, setFailed] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const openIndexRef = useRef(index);
+  const showPoster = Boolean(poster) && openIndexRef.current === index && !loaded;
   const touchStartX = useRef<number | null>(null);
 
   // Reset transient state when the visible image changes
@@ -33,13 +49,19 @@ export function Lightbox({ images, index, onClose, onPrev, onNext }: LightboxPro
     setLoaded(false);
   }, [index]);
 
-  // Preload current + neighbours so arrow/swipe taps feel instant
-  const neighbourSrcs = useMemo(() => {
+  // Only the immediately adjacent slides — never the whole set. Deduped so a
+  // 1- or 2-image gallery doesn't render the same warm-up twice.
+  const neighbours = useMemo(() => {
+    if (images.length < 2) return [];
     const prevIdx = (index - 1 + images.length) % images.length;
     const nextIdx = (index + 1) % images.length;
-    return [images[index].src, images[nextIdx].src, images[prevIdx].src];
+    const seen = new Set([images[index].src]);
+    return [images[nextIdx], images[prevIdx]].filter((n) => {
+      if (seen.has(n.src)) return false;
+      seen.add(n.src);
+      return true;
+    });
   }, [index, images]);
-  useImagePreload(neighbourSrcs);
 
   // Keyboard navigation + lock body scroll
   useEffect(() => {
@@ -145,16 +167,27 @@ export function Lightbox({ images, index, onClose, onPrev, onNext }: LightboxPro
           </div>
         )}
 
-        {!failed ? (
+        {showPoster && (
           /* eslint-disable-next-line @next/next/no-img-element */
           <img
+            aria-hidden
+            src={poster as string}
+            alt=""
+            draggable={false}
+            className="pointer-events-none absolute inset-0 m-auto block h-auto max-h-[94vh] w-auto max-w-[98vw] rounded-2xl object-contain"
+          />
+        )}
+
+        {!failed ? (
+          <Image
             key={img.src}
             src={img.src}
             alt={img.alt}
             width={1600}
             height={1200}
-            decoding="async"
-            loading="eager"
+            sizes={FULL_SIZES}
+            quality={QUALITY}
+            priority
             draggable={false}
             onLoad={() => setLoaded(true)}
             onError={() => setFailed(true)}
@@ -165,6 +198,27 @@ export function Lightbox({ images, index, onClose, onPrev, onNext }: LightboxPro
         ) : (
           <div className="fallback-food h-[60vh] w-[80vw] max-w-3xl rounded-2xl" />
         )}
+      </div>
+
+      {/*
+        Neighbour warm-up. Rendering the previous/next slides through the same
+        <Image> props guarantees byte-identical srcset candidates, so arrow and
+        swipe navigation is a cache hit rather than a fresh download. Only the
+        two adjacent images — never the whole category.
+      */}
+      <div aria-hidden className="pointer-events-none fixed h-px w-px overflow-hidden opacity-0">
+        {neighbours.map((n) => (
+          <Image
+            key={n.src}
+            src={n.src}
+            alt=""
+            width={1600}
+            height={1200}
+            sizes={FULL_SIZES}
+            quality={QUALITY}
+            draggable={false}
+          />
+        ))}
       </div>
     </div>
   );

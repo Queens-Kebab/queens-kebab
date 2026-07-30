@@ -1,17 +1,33 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { MenuItem, MenuTag } from "@/data/menu";
 import { translations } from "@/data/translations";
 import { useLanguage } from "@/lib/language";
+
+/**
+ * Default `sizes` matches the /menu grid: 1 column below sm, 2 up to lg,
+ * 3 above — capped by the `container-page` max width (max-w-7xl = 1280px,
+ * minus padding and two 20px gaps → ~390px per card).
+ *
+ * Callers with a different layout (e.g. the landing carousel) pass their own.
+ */
+const GRID_SIZES =
+  "(min-width: 1280px) 400px, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, calc(100vw - 2rem)";
 
 interface DishCardProps {
   item: MenuItem;
   variant?: "default" | "compact";
   priority?: boolean;
-  /** When provided and the item has an image, the image opens a lightbox. */
-  onImageClick?: () => void;
+  /** Responsive `sizes` hint; override when the card sits in a custom layout. */
+  sizes?: string;
+  /**
+   * When provided and the item has an image, the image opens a lightbox.
+   * Receives the card's resolved `currentSrc` so the lightbox can show those
+   * already-decoded bytes instantly instead of flashing black.
+   */
+  onImageClick?: (posterSrc?: string) => void;
 }
 
 const TAG_STYLE: Record<MenuTag, string> = {
@@ -31,10 +47,13 @@ export function DishCard({
   item,
   variant = "default",
   priority = false,
+  sizes = GRID_SIZES,
   onImageClick,
 }: DishCardProps) {
   const { t } = useLanguage();
   const [imgFailed, setImgFailed] = useState(false);
+  const [imgLoaded, setImgLoaded] = useState(false);
+  const imgRef = useRef<HTMLImageElement | null>(null);
   const compact = variant === "compact";
   const hasImage = Boolean(item.image) && !imgFailed;
   const clickable = hasImage && !!onImageClick;
@@ -51,27 +70,35 @@ export function DishCard({
               role: "button",
               tabIndex: 0,
               "aria-label": t(item.name),
-              onClick: onImageClick,
+              onClick: () => onImageClick(imgRef.current?.currentSrc),
               onKeyDown: (e: React.KeyboardEvent) => {
                 if (e.key === "Enter" || e.key === " ") {
                   e.preventDefault();
-                  onImageClick();
+                  onImageClick(imgRef.current?.currentSrc);
                 }
               },
             }
           : {})}
       >
         {hasImage ? (
-          <Image
-            src={item.image as string}
-            alt={t(item.name)}
-            fill
-            sizes="(max-width: 768px) 92vw, (max-width: 1200px) 45vw, 30vw"
-            quality={80}
-            className="object-cover transition duration-700 group-hover:scale-105"
-            priority={priority}
-            onError={() => setImgFailed(true)}
-          />
+          <>
+            {/* Sits behind the photo so a loading card never flashes white. */}
+            {!imgLoaded && <div aria-hidden className="fallback-food absolute inset-0" />}
+            <Image
+              ref={imgRef}
+              src={item.image as string}
+              alt={t(item.name)}
+              fill
+              sizes={sizes}
+              quality={78}
+              className={`object-cover transition duration-700 group-hover:scale-105 ${
+                imgLoaded ? "opacity-100" : "opacity-0"
+              }`}
+              priority={priority}
+              onLoad={() => setImgLoaded(true)}
+              onError={() => setImgFailed(true)}
+            />
+          </>
         ) : (
           <div className="fallback-food absolute inset-0 flex items-center justify-center">
             <svg
