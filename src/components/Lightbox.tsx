@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { createPortal } from "react-dom";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import type { GalleryImage } from "@/data/gallery";
@@ -12,6 +13,20 @@ import type { GalleryImage } from "@/data/gallery";
  */
 const FULL_SIZES = "100vw";
 const QUALITY = 80;
+
+/**
+ * The stage is sized purely from the viewport — never from the image. That is
+ * what keeps the slide centred on the very first frame: the box exists at its
+ * final size before any image data arrives, so nothing reflows once the photo
+ * decodes (the previous version sized itself to the image's intrinsic width,
+ * which both shifted the layout on load and left desktop images far smaller
+ * than the space available).
+ *
+ * Mobile keeps the previous footprint (98vw / 94dvh); `sm+` opens up to
+ * 92vw × 86dvh, capped at 1440px on very wide screens.
+ */
+const STAGE =
+  "relative h-[94dvh] w-[98vw] sm:h-[86dvh] sm:w-[92vw] sm:max-w-[1440px]";
 
 interface LightboxProps {
   images: GalleryImage[];
@@ -28,20 +43,27 @@ interface LightboxProps {
 }
 
 /**
- * Shared fullscreen image viewer used by the landing-page gallery and the
- * /galerie subpage. Supports:
+ * Shared fullscreen image viewer used by the landing-page menu preview, the
+ * /menu grid, the landing gallery and the /galerie subpage. Supports:
  *  - prev/next arrows
  *  - keyboard ← → and Esc
  *  - touch swipe left/right
  *  - body-scroll lock + neighbour preloading for instant navigation
+ *
+ * Rendered through a portal on `document.body` so no ancestor's transform,
+ * overflow or stacking context can shift or clip it.
  */
 export function Lightbox({ images, index, poster, onClose, onPrev, onNext }: LightboxProps) {
   const img = images[index];
   const [failed, setFailed] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const openIndexRef = useRef(index);
   const showPoster = Boolean(poster) && openIndexRef.current === index && !loaded;
   const touchStartX = useRef<number | null>(null);
+
+  // Portals need a DOM target, so only render after hydration.
+  useEffect(() => setMounted(true), []);
 
   // Reset transient state when the visible image changes
   useEffect(() => {
@@ -93,25 +115,31 @@ export function Lightbox({ images, index, poster, onClose, onPrev, onNext }: Lig
   };
 
   const arrowBtn =
-    "absolute top-1/2 z-20 -translate-y-1/2 grid h-12 w-12 place-items-center " +
+    "fixed top-1/2 z-[110] -translate-y-1/2 grid h-12 w-12 place-items-center " +
     "rounded-full text-white transition active:scale-95 " +
     "[filter:drop-shadow(0_2px_8px_rgba(0,0,0,0.9))] " +
     "sm:h-14 sm:w-14 sm:border sm:border-white/20 sm:bg-black/40 " +
     "sm:backdrop-blur-md sm:[filter:none] sm:shadow-lg " +
     "sm:hover:border-brand-red sm:hover:bg-brand-red/25 sm:hover:text-white";
 
-  return (
+  if (!mounted) return null;
+
+  return createPortal(
+    /*
+      Opacity-only fade. A transform here (the old `animate-fade-up` used
+      translateY) would make this element the containing block for every
+      `fixed` control inside it and visibly slide the slide into place.
+    */
     <div
       role="dialog"
       aria-modal="true"
       aria-label={img.alt}
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-sm animate-fade-up"
+      className="fixed inset-0 z-[100] grid h-[100dvh] w-screen place-items-center bg-black/90 backdrop-blur-sm animate-fade-in"
       onClick={onClose}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
-      {/* Close — fixed to the viewport so it stays clearly visible above the
-          image on mobile and desktop, with a safe-area-aware top offset. */}
+      {/* Close — fixed to the viewport, above the stage and the arrows. */}
       <button
         type="button"
         onClick={(e) => {
@@ -151,30 +179,32 @@ export function Lightbox({ images, index, poster, onClose, onPrev, onNext }: Lig
         <ChevronRight className="h-9 w-9 sm:h-7 sm:w-7" strokeWidth={2.5} />
       </button>
 
-      {/* Image frame */}
-      <div
-        className="relative flex items-center justify-center"
-        onClick={(e) => e.stopPropagation()}
-      >
+      {/*
+        Stable stage: fixed viewport-relative size, so it is centred before any
+        image loads and never resizes underneath the photo. Every layer inside
+        uses `object-contain`, so portrait, landscape and square images each
+        fill the axis they can without cropping or stretching.
+      */}
+      <div className={STAGE} onClick={(e) => e.stopPropagation()}>
         {!loaded && !failed && (
           <div
             aria-hidden
-            className="pointer-events-none absolute inset-0 overflow-hidden rounded-2xl"
-            style={{ aspectRatio: "4 / 3" }}
+            className="pointer-events-none absolute inset-0 grid place-items-center"
           >
-            <div className="fallback-food absolute inset-0" />
-            <div className="absolute inset-0 bg-gradient-to-tr from-black/70 via-transparent to-black/40" />
+            <span className="h-8 w-8 animate-spin rounded-full border-2 border-white/25 border-t-white/80" />
           </div>
         )}
 
         {showPoster && (
+          /* Already-decoded bytes from the card — shown instantly, at exactly
+             the same geometry as the full image, so the swap is invisible. */
           /* eslint-disable-next-line @next/next/no-img-element */
           <img
             aria-hidden
             src={poster as string}
             alt=""
             draggable={false}
-            className="pointer-events-none absolute inset-0 m-auto block h-auto max-h-[94vh] w-auto max-w-[98vw] rounded-2xl object-contain"
+            className="pointer-events-none absolute inset-0 h-full w-full rounded-2xl object-contain"
           />
         )}
 
@@ -183,20 +213,19 @@ export function Lightbox({ images, index, poster, onClose, onPrev, onNext }: Lig
             key={img.src}
             src={img.src}
             alt={img.alt}
-            width={1600}
-            height={1200}
+            fill
             sizes={FULL_SIZES}
             quality={QUALITY}
             priority
             draggable={false}
             onLoad={() => setLoaded(true)}
             onError={() => setFailed(true)}
-            className={`block h-auto max-h-[94vh] w-auto max-w-[98vw] rounded-2xl object-contain shadow-2xl transition-opacity duration-200 ${
-              loaded ? "opacity-100" : "opacity-0"
+            className={`rounded-2xl object-contain drop-shadow-2xl transition-opacity duration-200 ${
+              loaded ? "animate-lightbox-in opacity-100" : "opacity-0"
             }`}
           />
         ) : (
-          <div className="fallback-food h-[60vh] w-[80vw] max-w-3xl rounded-2xl" />
+          <div className="fallback-food absolute inset-0 m-auto h-[60dvh] w-[80vw] max-w-3xl rounded-2xl" />
         )}
       </div>
 
@@ -212,14 +241,15 @@ export function Lightbox({ images, index, poster, onClose, onPrev, onNext }: Lig
             key={n.src}
             src={n.src}
             alt=""
-            width={1600}
-            height={1200}
+            width={1254}
+            height={1254}
             sizes={FULL_SIZES}
             quality={QUALITY}
             draggable={false}
           />
         ))}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

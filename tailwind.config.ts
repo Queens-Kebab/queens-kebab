@@ -49,6 +49,18 @@ const config: Config = {
           "0%": { opacity: "0", transform: "translateY(12px)" },
           "100%": { opacity: "1", transform: "translateY(0)" },
         },
+        /* Lightbox open: opacity only — never animate layout position, and
+           never put a transform on the overlay (it would become the
+           containing block for the `fixed` controls). */
+        fadeIn: {
+          "0%": { opacity: "0" },
+          "100%": { opacity: "1" },
+        },
+        /* Lightbox image: opacity + a small scale, no translate. */
+        lightboxIn: {
+          "0%": { opacity: "0", transform: "scale(0.97)" },
+          "100%": { opacity: "1", transform: "scale(1)" },
+        },
         shimmer: {
           "0%": { backgroundPosition: "-200% 0" },
           "100%": { backgroundPosition: "200% 0" },
@@ -67,6 +79,8 @@ const config: Config = {
       },
       animation: {
         "fade-up": "fadeUp 0.6s ease-out both",
+        "fade-in": "fadeIn 0.2s ease-out both",
+        "lightbox-in": "lightboxIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) both",
         shimmer: "shimmer 2.5s linear infinite",
         "scroll-dot": "scrollDot 1.6s cubic-bezier(0.4, 0, 0.2, 1) infinite",
         marquee: "marquee 60s linear infinite",

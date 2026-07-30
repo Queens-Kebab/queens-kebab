@@ -200,8 +200,9 @@ export const LOCATIONS: Location[] = [
     reviewUrl:
       "https://search.google.com/local/writereview?placeid=REPLACE_WITH_PLACE_ID_BOHNICE",
     delivery: {
-      wolt: null,
-      bolt: null,
+      wolt: "https://wolt.com/cs/cze/prague/restaurant/queens-kebab-pizza",
+      bolt:
+        "https://food.bolt.eu/cs-cz/271/p/952780-queens-kebab-pizza?utm_source=share_provider&utm_medium=product&utm_content=menu_header",
       foodora:
         "https://www.foodora.cz/restaurant/s2yj/queens-kebab-and-pizza-s2yj?utm_campaign=google_reserve_place_order_action_CH-SEO_",
     },
