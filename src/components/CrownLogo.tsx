@@ -22,7 +22,7 @@ interface CrownLogoProps {
  *
  *  - White circular background with a soft outer ring (kept identical to
  *    the previous version)
- *  - Crown image (`/images/gallery/logo.png`) centered inside the circle
+ *  - Crown image (`/logo/logo-optimized.png`) centered inside the circle
  *  - `object-contain` preserves aspect ratio, never stretches or crops
  *
  * Single source of truth — used by `<Logo />` everywhere a logo mark
@@ -45,7 +45,7 @@ export function CrownLogo({
       aria-hidden="true"
     >
       <Image
-        src="/images/gallery/logo.png"
+        src="/logo/logo-optimized.png"
         alt="Queen's Kebab logo"
         width={innerPx}
         height={innerPx}

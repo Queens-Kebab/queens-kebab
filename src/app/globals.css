@@ -104,6 +104,32 @@ body {
   scrollbar-width: none;
 }
 
+/*
+  Anchor offset for /menu category sections.
+
+  Category headings sit below TWO stacked sticky elements — the main navbar
+  and the search + category-pill bar — so scroll-margin-top has to clear the
+  sum of both plus breathing room, otherwise the heading lands underneath
+  them. Measured: navbar 64 + filter bar 110 = 174 (mobile),
+  navbar 80 + filter bar 118 = 198 (sm+). Values below add ~20-26px of gap.
+
+  This only affects scrolling, never normal page flow, so it adds no blank
+  space between categories.
+*/
+/* Lifts text off busy photo backgrounds (branch cards) without a heavy overlay. */
+.text-shadow-soft {
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.85), 0 1px 12px rgba(0, 0, 0, 0.55);
+}
+
+.menu-section {
+  scroll-margin-top: 12.5rem;
+}
+@media (min-width: 640px) {
+  .menu-section {
+    scroll-margin-top: 14rem;
+  }
+}
+
 .fallback-food {
   background: linear-gradient(135deg, #1a1a1f 0%, #2c2c34 45%, #3a1c1f 100%);
   background-size: 200% 200%;

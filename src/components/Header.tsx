@@ -50,6 +50,16 @@ export function Header() {
     };
   }, [open]);
 
+  // Escape closes the mobile overlay
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [open]);
+
   // Scroll spy — only when on the homepage
   useEffect(() => {
     if (!onHome) {
@@ -137,9 +147,13 @@ export function Header() {
   return (
     <header
       className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
-        scrolled
-          ? "bg-ink-950/80 backdrop-blur-xl border-b border-white/5"
-          : "bg-gradient-to-b from-black/60 to-transparent"
+        // While the mobile overlay is open the bar must be fully opaque —
+        // otherwise the hero video shows through the strip above the menu.
+        open
+          ? "bg-ink-950 border-b border-white/5"
+          : scrolled
+            ? "bg-ink-950/80 backdrop-blur-xl border-b border-white/5"
+            : "bg-gradient-to-b from-black/60 to-transparent"
       }`}
     >
       <div className="container-page flex h-16 items-center justify-between gap-4 sm:h-20">
@@ -198,6 +212,7 @@ export function Header() {
             type="button"
             aria-label="Toggle menu"
             aria-expanded={open}
+            aria-controls="mobile-menu"
             onClick={() => setOpen((v) => !v)}
             className="grid h-10 w-10 place-items-center rounded-full border border-white/10 bg-white/5 lg:hidden"
           >
@@ -218,10 +233,18 @@ export function Header() {
         </div>
       </div>
 
-      {/* Mobile menu */}
+      {/*
+        Mobile menu — a true full-screen overlay. `fixed inset-0` covers the
+        whole visual viewport (more reliable than 100vh with mobile browser
+        chrome), the background is fully opaque so the hero video can't show
+        through, and scrolling is contained inside the panel. The bar above
+        is the header itself, which turns opaque while `open`.
+      */}
       <div
-        className={`lg:hidden fixed inset-x-0 top-16 sm:top-20 z-40 origin-top overflow-hidden bg-ink-950/95 backdrop-blur-xl border-b border-white/5 transition-all duration-300 ${
-          open ? "max-h-[80vh] opacity-100" : "max-h-0 opacity-0"
+        id="mobile-menu"
+        aria-hidden={!open}
+        className={`lg:hidden fixed inset-0 z-40 min-h-dvh overflow-y-auto overscroll-contain bg-ink-950 pb-[calc(1.5rem+env(safe-area-inset-bottom))] pt-[calc(4rem+env(safe-area-inset-top))] transition-opacity duration-300 sm:pt-[calc(5rem+env(safe-area-inset-top))] ${
+          open ? "visible opacity-100" : "invisible opacity-0"
         }`}
       >
         <div className="container-page flex flex-col gap-1 py-6">

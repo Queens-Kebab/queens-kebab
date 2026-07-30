@@ -103,10 +103,19 @@ export function DishCard({
           </div>
         )}
 
-        <div className="absolute bottom-3 right-3">
-          <span className="rounded-full bg-black/65 px-3.5 py-1.5 text-sm font-bold text-white backdrop-blur sm:text-base">
-            {item.price}
-          </span>
+        {/* Price chip is omitted entirely when the branch price isn't
+            confirmed yet — better than rendering a misleading "0 Kč". */}
+        <div className="absolute bottom-3 right-3 flex items-center gap-2">
+          {item.badge && (
+            <span className="rounded-full border border-brand-gold/40 bg-black/65 px-2.5 py-1 text-[11px] font-semibold text-brand-cream backdrop-blur">
+              {item.badge}
+            </span>
+          )}
+          {item.price && (
+            <span className="rounded-full bg-black/65 px-3.5 py-1.5 text-sm font-bold text-white backdrop-blur sm:text-base">
+              {item.price}
+            </span>
+          )}
         </div>
       </div>
 

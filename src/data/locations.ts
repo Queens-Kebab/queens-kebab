@@ -170,7 +170,10 @@ export const LOCATIONS: Location[] = [
   },
   {
     id: "bohnice",
-    name: { cs: "Queen's Kebab Bohnice", en: "Queen's Kebab Bohnice" },
+    name: {
+      cs: "Queen's Kebab & Pizza Bohnice",
+      en: "Queen's Kebab & Pizza Bohnice",
+    },
     address: "Lodžská 399/26, 181 00 Praha 8",
     district: { cs: "Bohnice", en: "Bohnice" },
     phone: BOHNICE_PHONE,

@@ -191,6 +191,7 @@ export const translations = {
     veggie: { cs: "Vegetariánské", en: "Vegetarian" },
     fries: { cs: "Hranolky", en: "Fries" },
     pizza32: { cs: "Pizza 32 cm", en: "Pizza 32 cm" },
+    desserts: { cs: "Dezerty", en: "Desserts" },
   },
   order: {
     wolt: { cs: "Objednat na Wolt", en: "Order on Wolt" },

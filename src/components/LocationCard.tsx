@@ -62,13 +62,16 @@ export function LocationCard({
             alt=""
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 25vw"
-            className="object-cover opacity-35 transition-opacity duration-500 group-hover:opacity-50"
+            className="object-cover opacity-45 transition-opacity duration-500 group-hover:opacity-60"
           />
-          {/* Default state prioritizes readability: dark scrim + a strong
-              gradient over the text area. Nudged ~2% darker for readability
-              while the photo stays visible. */}
-          <div className="absolute inset-0 bg-ink-950/64" />
-          <div className="absolute inset-0 bg-gradient-to-t from-ink-950/94 via-ink-950/89 to-ink-950/78" />
+          {/*
+            Readability without flattening the photo: a light overall scrim
+            keeps the exterior shot visible, while a bottom-weighted gradient
+            concentrates the contrast behind the address / hours / phone
+            block so those values stay crisp.
+          */}
+          <div className="absolute inset-0 bg-ink-950/40" />
+          <div className="absolute inset-0 bg-gradient-to-t from-ink-950/95 via-ink-950/88 to-ink-950/55" />
         </div>
       )}
 
@@ -84,7 +87,7 @@ export function LocationCard({
               {typeof index === "number" ? `0${index + 1}` : "·"} ·{" "}
               {t(location.district)}
             </span>
-            <h3 className="mt-2 h-display text-xl font-semibold text-white sm:text-2xl">
+            <h3 className="mt-2 h-display text-xl font-semibold text-white text-shadow-soft sm:text-2xl">
               {t(location.name)}
             </h3>
           </div>
@@ -97,16 +100,18 @@ export function LocationCard({
           <div className="flex items-start gap-3">
             <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-brand-red" strokeWidth={1.75} />
             <div>
-              <dt className="text-[11px] uppercase tracking-wider text-white/55">
+              <dt className="text-[11px] uppercase tracking-wider text-white/70">
                 {t(translations.common.address)}
               </dt>
-              <dd className="text-white/85">{location.address}</dd>
+              <dd className="font-medium text-white text-shadow-soft">
+                {location.address}
+              </dd>
             </div>
           </div>
           <div className="flex items-start gap-3">
             <Clock className="mt-0.5 h-4 w-4 shrink-0 text-brand-red" strokeWidth={1.75} />
             <div className="min-w-0 flex-1">
-              <dt className="text-[11px] uppercase tracking-wider text-white/55">
+              <dt className="text-[11px] uppercase tracking-wider text-white/70">
                 {t(translations.common.openingHours)}
               </dt>
               <dd className="mt-1 space-y-0.5">
@@ -117,11 +122,13 @@ export function LocationCard({
                       key={i}
                       className="flex items-baseline justify-between gap-3 text-sm"
                     >
-                      <span className="text-white/70">{t(row.days)}</span>
+                      <span className="text-white/80 text-shadow-soft">
+                        {t(row.days)}
+                      </span>
                       {hours && (
                         <span
-                          className={`tabular-nums font-medium ${
-                            row.closed ? "text-white/45" : "text-white/90"
+                          className={`tabular-nums font-semibold text-shadow-soft ${
+                            row.closed ? "text-white/60" : "text-white"
                           }`}
                         >
                           {hours}
@@ -136,16 +143,18 @@ export function LocationCard({
           <div className="flex items-start gap-3">
             <Phone className="mt-0.5 h-4 w-4 shrink-0 text-brand-red" strokeWidth={1.75} />
             <div>
-              <dt className="text-[11px] uppercase tracking-wider text-white/55">
+              <dt className="text-[11px] uppercase tracking-wider text-white/70">
                 {t(translations.common.phone)}
               </dt>
               <dd>
                 {coming ? (
-                  <span className="text-white/85">{formatPhone(location.phone)}</span>
+                  <span className="font-medium text-white text-shadow-soft">
+                    {formatPhone(location.phone)}
+                  </span>
                 ) : (
                   <a
                     href={`tel:${location.phone}`}
-                    className="text-white/85 transition hover:text-brand-red"
+                    className="font-medium text-white transition text-shadow-soft hover:text-brand-red"
                   >
                     {formatPhone(location.phone)}
                   </a>

@@ -272,7 +272,7 @@ export function FullMenu() {
                   <section
                     key={cat}
                     id={sectionId(cat)}
-                    className="scroll-mt-40 sm:scroll-mt-44"
+                    className="menu-section"
                   >
                     <div className="mb-6 flex items-end justify-between gap-4 border-b border-white/5 pb-3">
                       <h2 className="h-display text-2xl font-semibold text-white sm:text-3xl">

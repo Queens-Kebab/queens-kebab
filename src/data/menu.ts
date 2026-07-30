@@ -22,7 +22,8 @@ export type MenuCategoryId =
   | "burger"
   | "veggie"
   | "fries"
-  | "pizza32";
+  | "pizza32"
+  | "desserts";
 
 export type MenuTag =
   | "bestseller"
@@ -40,8 +41,17 @@ export interface MenuItem {
   category: MenuCategoryId;
   name: TranslationLeaf;
   description: TranslationLeaf;
-  /** Display price, e.g. "185 Kč". */
-  price: string;
+  /**
+   * Display price, e.g. "185 Kč". Already the final amount — never add
+   * surcharges on top in code. Omit when the branch price isn't confirmed
+   * yet: the card then hides the price chip rather than showing "0 Kč".
+   */
+  price?: string;
+  /**
+   * Small informational chip, e.g. "+20 Kč" on an upgraded variant. Purely
+   * a label — `price` above must already include the surcharge.
+   */
+  badge?: string;
   /** WebP image under /public/menu. If missing, a dark placeholder shows. */
   image?: string;
   tags?: MenuTag[];
@@ -298,54 +308,69 @@ export const VRSOVICE_CATEGORY_ORDER: MenuCategoryId[] = [
 
 // ───────────────────────────────────────────────────────────────────────────
 // Bohnice — its own concept menu (Kebab Gemüse, Burger, Veggie, Fries,
-// Pizza 32 cm). No images yet: `image` is intentionally omitted on every
-// item — DishCard/Lightbox already fall back to a safe placeholder and
-// skip the lightbox entirely for imageless items, so nothing crashes or
-// opens broken. Final image paths land in a later update.
+// Pizza 32 cm, Dezerty, Nápoje).
+//
+// Two conventions worth knowing before editing:
+//  - The "s hranolky nebo rýží" rows are separate products, not add-ons.
+//    Their `price` is already the final upgraded amount (base + 20 Kč); the
+//    `badge` is only a label, so never add the surcharge again in code.
+//  - Items without `image` render the shared placeholder and are skipped by
+//    the lightbox, so a missing photo can never crash or open empty.
 // ───────────────────────────────────────────────────────────────────────────
 export const BOHNICE_MENU_ITEMS: MenuItem[] = [
-  // Kebab Gemüse (1–6)
-  // TODO: "S hranolky / rýží +20 Kč" add-on for Box/Talíř — the data model
-  // has no extras/add-ons field yet, so it isn't modeled as a card here to
-  // avoid inventing a fake product entry. Add a proper extras field first.
-  { id: "bo-durum", number: 1, category: "kebab-gemuse", name: { cs: "Dürüm", en: "Dürüm" }, description: { cs: "Kebab Gemüse v tortille se zeleninou a omáčkou.", en: "Kebab Gemüse in a tortilla with vegetables and sauce." }, price: "159 Kč" },
+  // Kebab Gemüse (1–10)
+  { id: "bo-durum", number: 1, category: "kebab-gemuse", name: { cs: "Dürüm", en: "Dürüm" }, description: { cs: "Kebab Gemüse v tortille se zeleninou a omáčkou.", en: "Kebab Gemüse in a tortilla with vegetables and sauce." }, price: "159 Kč", image: IMG("classic-durum-kebab-wrap.webp") },
   { id: "bo-pita", number: 2, category: "kebab-gemuse", name: { cs: "Pita", en: "Pita" }, description: { cs: "Kebab Gemüse v pita chlebu se zeleninou a omáčkou.", en: "Kebab Gemüse in pita bread with vegetables and sauce." }, price: "149 Kč" },
-  { id: "bo-box-maly", number: 3, category: "kebab-gemuse", name: { cs: "Box malý", en: "Small Box" }, description: { cs: "Malý box s kebabem Gemüse, zeleninou a omáčkou.", en: "Small box with Gemüse kebab, vegetables and sauce." }, price: "119 Kč" },
-  { id: "bo-box-velky", number: 4, category: "kebab-gemuse", name: { cs: "Box velký", en: "Large Box" }, description: { cs: "Velký box s kebabem Gemüse, zeleninou a omáčkou.", en: "Large box with Gemüse kebab, vegetables and sauce." }, price: "149 Kč" },
-  { id: "bo-talir-maly", number: 5, category: "kebab-gemuse", name: { cs: "Talíř malý", en: "Small Plate" }, description: { cs: "Malý talíř s kebabem Gemüse, zeleninou a přílohou.", en: "Small plate with Gemüse kebab, vegetables and a side." }, price: "179 Kč" },
-  { id: "bo-talir-velky", number: 6, category: "kebab-gemuse", name: { cs: "Talíř velký", en: "Large Plate" }, description: { cs: "Velký talíř s kebabem Gemüse, zeleninou a přílohou.", en: "Large plate with Gemüse kebab, vegetables and a side." }, price: "209 Kč" },
+  { id: "bo-box-maly", number: 3, category: "kebab-gemuse", name: { cs: "Malý box", en: "Small box" }, description: { cs: "Malý box s kebabem Gemüse, zeleninou a omáčkou.", en: "Small box with Gemüse kebab, vegetables and sauce." }, price: "119 Kč", image: IMG("kebab-box.webp") },
+  { id: "bo-box-maly-hr", number: 4, category: "kebab-gemuse", name: { cs: "Malý box s hranolky nebo rýží", en: "Small box with fries or rice" }, description: { cs: "Malý box s kebabem Gemüse, zeleninou, omáčkou a přílohou.", en: "Small box with Gemüse kebab, vegetables, sauce and a side." }, price: "139 Kč", badge: "+20 Kč", image: IMG("kebab-box-with-fries.webp") },
+  { id: "bo-box-velky", number: 5, category: "kebab-gemuse", name: { cs: "Velký box", en: "Large box" }, description: { cs: "Velký box s kebabem Gemüse, zeleninou a omáčkou.", en: "Large box with Gemüse kebab, vegetables and sauce." }, price: "149 Kč", image: IMG("kebab-box.webp") },
+  { id: "bo-box-velky-hr", number: 6, category: "kebab-gemuse", name: { cs: "Velký box s hranolky nebo rýží", en: "Large box with fries or rice" }, description: { cs: "Velký box s kebabem Gemüse, zeleninou, omáčkou a přílohou.", en: "Large box with Gemüse kebab, vegetables, sauce and a side." }, price: "169 Kč", badge: "+20 Kč", image: IMG("kebab-box-with-fries.webp") },
+  { id: "bo-talir-maly", number: 7, category: "kebab-gemuse", name: { cs: "Malý talíř", en: "Small plate" }, description: { cs: "Malý talíř s kebabem Gemüse, zeleninou a přílohou.", en: "Small plate with Gemüse kebab, vegetables and a side." }, price: "179 Kč" },
+  { id: "bo-talir-maly-hr", number: 8, category: "kebab-gemuse", name: { cs: "Malý talíř s hranolky nebo rýží", en: "Small plate with fries or rice" }, description: { cs: "Malý talíř s kebabem Gemüse, zeleninou a přílohou.", en: "Small plate with Gemüse kebab, vegetables and a side." }, price: "199 Kč", badge: "+20 Kč", image: IMG("doner-kebab-plate-with-fries.webp") },
+  { id: "bo-talir-velky", number: 9, category: "kebab-gemuse", name: { cs: "Velký talíř", en: "Large plate" }, description: { cs: "Velký talíř s kebabem Gemüse, zeleninou a přílohou.", en: "Large plate with Gemüse kebab, vegetables and a side." }, price: "209 Kč" },
+  { id: "bo-talir-velky-hr", number: 10, category: "kebab-gemuse", name: { cs: "Velký talíř s hranolky nebo rýží", en: "Large plate with fries or rice" }, description: { cs: "Velký talíř s kebabem Gemüse, zeleninou a přílohou.", en: "Large plate with Gemüse kebab, vegetables and a side." }, price: "229 Kč", badge: "+20 Kč", image: IMG("doner-kebab-plate-with-fries.webp") },
 
-  // Burger (7–8)
-  { id: "bo-burger-klasik", number: 7, category: "burger", name: { cs: "Klasik", en: "Classic" }, description: { cs: "Mleté hovězí maso, nakládaná okurka, čedar, salát, BBQ omáčka a bulka.", en: "Beef patty, pickles, cheddar, lettuce, BBQ sauce and a bun." }, price: "219 Kč" },
-  { id: "bo-burger-cheesy", number: 8, category: "burger", name: { cs: "Cheesy Burger", en: "Cheesy Burger" }, description: { cs: "Mleté hovězí maso, červená cibule, čedar, salát, cheese dip omáčka a bulka.", en: "Beef patty, red onion, cheddar, lettuce, cheese dip sauce and a bun." }, price: "239 Kč" },
+  // Burger (11–12)
+  { id: "bo-burger-klasik", number: 11, category: "burger", name: { cs: "Klasik", en: "Classic" }, description: { cs: "Mleté hovězí maso, nakládaná okurka, čedar, salát, BBQ omáčka a bulka.", en: "Beef patty, pickles, cheddar, lettuce, BBQ sauce and a bun." }, price: "219 Kč", image: IMG("klasik-burger.png") },
+  { id: "bo-burger-cheesy", number: 12, category: "burger", name: { cs: "Cheesy Burger", en: "Cheesy Burger" }, description: { cs: "Mleté hovězí maso, červená cibule, čedar, salát, cheese dip omáčka a bulka.", en: "Beef patty, red onion, cheddar, lettuce, cheese dip sauce and a bun." }, price: "239 Kč", image: IMG("cheesy-burger.webp") },
 
-  // Vegetariánské (9–13)
-  { id: "bo-halloumi-wrap", number: 9, category: "veggie", name: { cs: "Halloumi wrap", en: "Halloumi Wrap" }, description: { cs: "Grilované halloumi v tortille se zeleninou a omáčkou.", en: "Grilled halloumi in a tortilla with vegetables and sauce." }, price: "159 Kč", tags: ["vegetarian"] },
-  { id: "bo-halloumi-box", number: 10, category: "veggie", name: { cs: "Halloumi box", en: "Halloumi Box" }, description: { cs: "Grilované halloumi v boxu se zeleninou a omáčkou.", en: "Grilled halloumi in a box with vegetables and sauce." }, price: "159 Kč", tags: ["vegetarian"] },
-  { id: "bo-falafel-wrap", number: 11, category: "veggie", name: { cs: "Falafel wrap", en: "Falafel Wrap" }, description: { cs: "Falafel v tortille se zeleninou a omáčkou.", en: "Falafel in a tortilla with vegetables and sauce." }, price: "159 Kč", tags: ["vegetarian"] },
-  { id: "bo-falafel-box", number: 12, category: "veggie", name: { cs: "Falafel box", en: "Falafel Box" }, description: { cs: "Falafel v boxu se zeleninou a omáčkou.", en: "Falafel in a box with vegetables and sauce." }, price: "159 Kč", tags: ["vegetarian"] },
-  { id: "bo-mix-salad", number: 13, category: "veggie", name: { cs: "Mix Salad", en: "Mix Salad" }, description: { cs: "Čerstvý míchaný zeleninový salát.", en: "Fresh mixed vegetable salad." }, price: "119 Kč", tags: ["vegetarian"] },
+  // Vegetariánské (13–17)
+  { id: "bo-halloumi-wrap", number: 13, category: "veggie", name: { cs: "Halloumi wrap", en: "Halloumi wrap" }, description: { cs: "Grilované halloumi v tortille se zeleninou a omáčkou.", en: "Grilled halloumi in a tortilla with vegetables and sauce." }, price: "159 Kč", image: IMG("halloumi-durum-wrap.webp"), tags: ["vegetarian"] },
+  { id: "bo-halloumi-box", number: 14, category: "veggie", name: { cs: "Halloumi box", en: "Halloumi box" }, description: { cs: "Grilované halloumi v boxu se zeleninou a omáčkou.", en: "Grilled halloumi in a box with vegetables and sauce." }, price: "159 Kč", image: IMG("halloumi-box.webp"), tags: ["vegetarian"] },
+  { id: "bo-falafel-wrap", number: 15, category: "veggie", name: { cs: "Falafel wrap", en: "Falafel wrap" }, description: { cs: "Falafel v tortille se zeleninou a omáčkou.", en: "Falafel in a tortilla with vegetables and sauce." }, price: "159 Kč", image: IMG("falafel-durum-wrap.webp"), tags: ["vegetarian"] },
+  { id: "bo-falafel-box", number: 16, category: "veggie", name: { cs: "Falafel box", en: "Falafel box" }, description: { cs: "Falafel v boxu se zeleninou a omáčkou.", en: "Falafel in a box with vegetables and sauce." }, price: "159 Kč", image: IMG("falafel-box.webp"), tags: ["vegetarian"] },
+  { id: "bo-mix-salad", number: 17, category: "veggie", name: { cs: "Mix Salad", en: "Mix Salad" }, description: { cs: "Čerstvý míchaný zeleninový salát.", en: "Fresh mixed vegetable salad." }, price: "119 Kč", image: IMG("mixed-salad.webp"), tags: ["vegetarian"] },
 
-  // Hranolky (14–16)
-  { id: "bo-hranolky-klasik", number: 14, category: "fries", name: { cs: "Klasik", en: "Classic" }, description: { cs: "Křupavé zlatavé hranolky.", en: "Crispy golden fries." }, price: "59 Kč", tags: ["vegetarian"] },
-  { id: "bo-hranolky-balkan", number: 15, category: "fries", name: { cs: "Balkán", en: "Balkan" }, description: { cs: "Hranolky s balkánským sýrem.", en: "Fries with Balkan cheese." }, price: "79 Kč", tags: ["vegetarian"] },
-  { id: "bo-hranolky-chilli-cheddar", number: 16, category: "fries", name: { cs: "Chilli Cheddar", en: "Chilli Cheddar" }, description: { cs: "Hranolky s chilli cheddar omáčkou.", en: "Fries with chilli cheddar sauce." }, price: "119 Kč", tags: ["vegetarian", "spicy"] },
+  // Hranolky (18–20)
+  { id: "bo-hranolky-klasik", number: 18, category: "fries", name: { cs: "Klasik", en: "Classic" }, description: { cs: "Křupavé zlatavé hranolky.", en: "Crispy golden fries." }, price: "59 Kč", image: IMG("french-fries.webp"), tags: ["vegetarian"] },
+  { id: "bo-hranolky-balkan", number: 19, category: "fries", name: { cs: "Balkán", en: "Balkan" }, description: { cs: "Hranolky s balkánským sýrem.", en: "Fries with Balkan cheese." }, price: "79 Kč", image: IMG("balkan-fries.webp"), tags: ["vegetarian"] },
+  { id: "bo-hranolky-chilli-cheddar", number: 20, category: "fries", name: { cs: "Chilli Cheddar", en: "Chilli Cheddar" }, description: { cs: "Hranolky s chilli cheddar omáčkou.", en: "Fries with chilli cheddar sauce." }, price: "119 Kč", image: IMG("chilli-cheddar-fries.webp"), tags: ["vegetarian", "spicy"] },
 
-  // Pizza 32 cm (17–30)
-  { id: "bo-pizza-margherita", number: 17, category: "pizza32", name: { cs: "Margherita", en: "Margherita" }, description: { cs: "Rajčatová omáčka, mozzarella a bazalka.", en: "Tomato sauce, mozzarella and basil." }, price: "195 Kč", tags: ["vegetarian"] },
-  { id: "bo-pizza-sunkova", number: 18, category: "pizza32", name: { cs: "Šunková", en: "Ham" }, description: { cs: "Rajčatová omáčka, mozzarella a šunka.", en: "Tomato sauce, mozzarella and ham." }, price: "210 Kč" },
-  { id: "bo-pizza-salamova", number: 19, category: "pizza32", name: { cs: "Salámová", en: "Salami" }, description: { cs: "Rajčatová omáčka, mozzarella a salám.", en: "Tomato sauce, mozzarella and salami." }, price: "210 Kč" },
-  { id: "bo-pizza-funghi", number: 20, category: "pizza32", name: { cs: "Funghi", en: "Funghi" }, description: { cs: "Rajčatová omáčka, mozzarella a žampiony.", en: "Tomato sauce, mozzarella and mushrooms." }, price: "210 Kč", tags: ["vegetarian"] },
-  { id: "bo-pizza-tonno", number: 21, category: "pizza32", name: { cs: "Tonno", en: "Tonno" }, description: { cs: "Rajčatová omáčka, mozzarella, tuňák a cibule.", en: "Tomato sauce, mozzarella, tuna and onion." }, price: "220 Kč" },
-  { id: "bo-pizza-hawaii", number: 22, category: "pizza32", name: { cs: "Hawaii", en: "Hawaii" }, description: { cs: "Rajčatová omáčka, mozzarella, šunka a ananas.", en: "Tomato sauce, mozzarella, ham and pineapple." }, price: "210 Kč" },
-  { id: "bo-pizza-quattro-formaggi", number: 23, category: "pizza32", name: { cs: "Quattro Formaggi", en: "Quattro Formaggi" }, description: { cs: "Rajčatová omáčka, mozzarella, gorgonzola, parmezán a eidam.", en: "Tomato sauce, mozzarella, gorgonzola, parmesan and edam." }, price: "220 Kč", tags: ["vegetarian"] },
-  { id: "bo-pizza-capricciosa", number: 24, category: "pizza32", name: { cs: "Capricciosa", en: "Capricciosa" }, description: { cs: "Rajčatová omáčka, mozzarella, šunka, žampiony a olivy.", en: "Tomato sauce, mozzarella, ham, mushrooms and olives." }, price: "225 Kč" },
-  { id: "bo-pizza-kebab", number: 25, category: "pizza32", name: { cs: "Kebab Pizza", en: "Kebab Pizza" }, description: { cs: "Rajčatová omáčka, mozzarella, kebab maso, cibule a paprika.", en: "Tomato sauce, mozzarella, kebab meat, onion and bell pepper." }, price: "230 Kč" },
-  { id: "bo-pizza-chicken-kebab", number: 26, category: "pizza32", name: { cs: "Chicken Kebab", en: "Chicken Kebab" }, description: { cs: "Rajčatová omáčka, mozzarella, kuřecí kebab, cibule a paprika.", en: "Tomato sauce, mozzarella, chicken kebab, onion and bell pepper." }, price: "235 Kč" },
-  { id: "bo-pizza-mexicana", number: 27, category: "pizza32", name: { cs: "Mexicana", en: "Mexicana" }, description: { cs: "Rajčatová omáčka, mozzarella, pikantní salám, kukuřice a jalapeño papričky.", en: "Tomato sauce, mozzarella, spicy salami, sweetcorn and jalapeños." }, price: "230 Kč", tags: ["spicy"] },
-  { id: "bo-pizza-spicy-kebab", number: 28, category: "pizza32", name: { cs: "Spicy Kebab", en: "Spicy Kebab" }, description: { cs: "Rajčatová omáčka, mozzarella, pikantní kebab maso, jalapeño a chilli omáčka.", en: "Tomato sauce, mozzarella, spicy kebab meat, jalapeños and chilli sauce." }, price: "245 Kč", tags: ["spicy"] },
-  { id: "bo-pizza-vegetarian", number: 29, category: "pizza32", name: { cs: "Vegetarian", en: "Vegetarian" }, description: { cs: "Rajčatová omáčka, mozzarella, žampiony, kukuřice, paprika a olivy.", en: "Tomato sauce, mozzarella, mushrooms, sweetcorn, bell pepper and olives." }, price: "210 Kč", tags: ["vegetarian"] },
-  { id: "bo-pizza-spinachi", number: 30, category: "pizza32", name: { cs: "Spinachi", en: "Spinachi" }, description: { cs: "Rajčatová omáčka, mozzarella, špenát, česnek a balkánský sýr.", en: "Tomato sauce, mozzarella, spinach, garlic and Balkan cheese." }, price: "220 Kč", tags: ["vegetarian"] },
+  // Pizza 32 cm (21–34)
+  { id: "bo-pizza-margherita", number: 21, category: "pizza32", name: { cs: "Margherita", en: "Margherita" }, description: { cs: "Rajčatová omáčka, mozzarella a bazalka.", en: "Tomato sauce, mozzarella and basil." }, price: "195 Kč", image: IMG("margherita.webp"), tags: ["vegetarian"] },
+  { id: "bo-pizza-sunkova", number: 22, category: "pizza32", name: { cs: "Šunková", en: "Ham" }, description: { cs: "Rajčatová omáčka, mozzarella a šunka.", en: "Tomato sauce, mozzarella and ham." }, price: "210 Kč", image: IMG("sunkova.webp") },
+  { id: "bo-pizza-salamova", number: 23, category: "pizza32", name: { cs: "Salámová", en: "Salami" }, description: { cs: "Rajčatová omáčka, mozzarella a salám.", en: "Tomato sauce, mozzarella and salami." }, price: "210 Kč", image: IMG("salamova.webp") },
+  { id: "bo-pizza-funghi", number: 24, category: "pizza32", name: { cs: "Funghi", en: "Funghi" }, description: { cs: "Rajčatová omáčka, mozzarella a žampiony.", en: "Tomato sauce, mozzarella and mushrooms." }, price: "210 Kč", image: IMG("funghi.webp"), tags: ["vegetarian"] },
+  { id: "bo-pizza-tonno", number: 25, category: "pizza32", name: { cs: "Tonno", en: "Tonno" }, description: { cs: "Rajčatová omáčka, mozzarella, tuňák a cibule.", en: "Tomato sauce, mozzarella, tuna and onion." }, price: "220 Kč", image: IMG("tonno.webp") },
+  { id: "bo-pizza-hawaii", number: 26, category: "pizza32", name: { cs: "Hawaii", en: "Hawaii" }, description: { cs: "Rajčatová omáčka, mozzarella, šunka a ananas.", en: "Tomato sauce, mozzarella, ham and pineapple." }, price: "210 Kč", image: IMG("hawaii.webp") },
+  { id: "bo-pizza-quattro-formaggi", number: 27, category: "pizza32", name: { cs: "Quattro Formaggi", en: "Quattro Formaggi" }, description: { cs: "Rajčatová omáčka, mozzarella, gorgonzola, parmezán a eidam.", en: "Tomato sauce, mozzarella, gorgonzola, parmesan and edam." }, price: "220 Kč", image: IMG("quattro-formaggi.webp"), tags: ["vegetarian"] },
+  { id: "bo-pizza-capricciosa", number: 28, category: "pizza32", name: { cs: "Capricciosa", en: "Capricciosa" }, description: { cs: "Rajčatová omáčka, mozzarella, šunka, žampiony a olivy.", en: "Tomato sauce, mozzarella, ham, mushrooms and olives." }, price: "225 Kč", image: IMG("capricciosa.webp") },
+  { id: "bo-pizza-kebab", number: 29, category: "pizza32", name: { cs: "Kebab Pizza", en: "Kebab Pizza" }, description: { cs: "Rajčatová omáčka, mozzarella, kebab maso, cibule a paprika.", en: "Tomato sauce, mozzarella, kebab meat, onion and bell pepper." }, price: "230 Kč", image: IMG("kebab-pizza.webp") },
+  { id: "bo-pizza-chicken-kebab", number: 30, category: "pizza32", name: { cs: "Chicken Kebab", en: "Chicken Kebab" }, description: { cs: "Rajčatová omáčka, mozzarella, kuřecí kebab, cibule a paprika.", en: "Tomato sauce, mozzarella, chicken kebab, onion and bell pepper." }, price: "235 Kč", image: IMG("chicken-kebab.webp") },
+  { id: "bo-pizza-mexicana", number: 31, category: "pizza32", name: { cs: "Mexicana", en: "Mexicana" }, description: { cs: "Rajčatová omáčka, mozzarella, pikantní salám, kukuřice a jalapeño papričky.", en: "Tomato sauce, mozzarella, spicy salami, sweetcorn and jalapeños." }, price: "230 Kč", image: IMG("mexicana.webp"), tags: ["spicy"] },
+  { id: "bo-pizza-spicy-kebab", number: 32, category: "pizza32", name: { cs: "Spicy Kebab", en: "Spicy Kebab" }, description: { cs: "Rajčatová omáčka, mozzarella, pikantní kebab maso, jalapeño a chilli omáčka.", en: "Tomato sauce, mozzarella, spicy kebab meat, jalapeños and chilli sauce." }, price: "245 Kč", image: IMG("spicy-kebab.webp"), tags: ["spicy"] },
+  { id: "bo-pizza-vegetarian", number: 33, category: "pizza32", name: { cs: "Vegetarian", en: "Vegetarian" }, description: { cs: "Rajčatová omáčka, mozzarella, žampiony, kukuřice, paprika a olivy.", en: "Tomato sauce, mozzarella, mushrooms, sweetcorn, bell pepper and olives." }, price: "210 Kč", image: IMG("vegetarian.webp"), tags: ["vegetarian"] },
+  // No spinachi.webp in /public/menu yet — placeholder until the photo lands.
+  { id: "bo-pizza-spinachi", number: 34, category: "pizza32", name: { cs: "Spinachi", en: "Spinachi" }, description: { cs: "Rajčatová omáčka, mozzarella, špenát, česnek a balkánský sýr.", en: "Tomato sauce, mozzarella, spinach, garlic and Balkan cheese." }, price: "220 Kč", tags: ["vegetarian"] },
+
+  // Dezerty (35) — price not confirmed for Bohnice yet, so it stays unset
+  // and the card simply omits the price chip instead of showing "0 Kč".
+  { id: "bo-baklava", number: 35, category: "desserts", name: { cs: "Baklava", en: "Baklava" }, description: { cs: "Tradiční sladký dezert z vrstev těsta, ořechů a sirupu.", en: "Traditional layered pastry with nuts and sweet syrup." }, image: IMG("baklava.webp"), tags: ["dessert"] },
+
+  // Nápoje (36–38) — Bohnice prices not confirmed yet (see Baklava above).
+  { id: "bo-cola", number: 36, category: "drinks", name: { cs: "Cola", en: "Cola" }, description: { cs: "Nealkoholický sycený nápoj.", en: "Carbonated soft drink." }, image: IMG("soft-drink-cola.webp"), tags: ["drink"] },
+  { id: "bo-fanta", number: 37, category: "drinks", name: { cs: "Fanta", en: "Fanta" }, description: { cs: "Pomerančový sycený nealkoholický nápoj.", en: "Orange-flavoured carbonated soft drink." }, image: IMG("fanta.webp"), tags: ["drink"] },
+  { id: "bo-ayran", number: 38, category: "drinks", name: { cs: "Ayran", en: "Ayran" }, description: { cs: "Tradiční osvěžující jogurtový nápoj.", en: "Traditional refreshing yoghurt drink." }, image: IMG("ayran.webp"), tags: ["drink"] },
 ];
 
 export const BOHNICE_CATEGORY_ORDER: MenuCategoryId[] = [
@@ -354,6 +379,8 @@ export const BOHNICE_CATEGORY_ORDER: MenuCategoryId[] = [
   "veggie",
   "fries",
   "pizza32",
+  "desserts",
+  "drinks",
 ];
 
 // ───────────────────────────────────────────────────────────────────────────
