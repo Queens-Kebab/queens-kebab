@@ -57,10 +57,11 @@ function TileButton({
       ) : (
         <div className="fallback-food absolute inset-0" />
       )}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-80 transition group-hover:opacity-100"
-      />
+      {/*
+        No tint over the photo — thumbnails show their natural colours. The
+        "open" affordance below carries its own dark pill, so it stays legible
+        without darkening the image underneath it.
+      */}
       <span
         aria-hidden
         className="pointer-events-none absolute bottom-3 right-3 grid h-9 w-9 place-items-center rounded-full bg-black/50 text-white opacity-0 backdrop-blur transition group-hover:opacity-100"

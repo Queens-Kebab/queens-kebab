@@ -114,7 +114,9 @@ export function WhyUs() {
                     sizes="(max-width: 768px) 80vw, 25vw"
                     className="object-cover opacity-60 transition-opacity duration-500 group-hover:opacity-72"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-ink-950/96 via-ink-950/45 to-ink-950/8" />
+                  {/* Opacity suffixes must be multiples of 5 (Tailwind's
+                      default scale) — /96 and /8 emitted no CSS at all. */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-ink-950/95 via-ink-950/45 to-ink-950/10" />
                 </div>
               )}
 

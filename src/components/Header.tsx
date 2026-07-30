@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { X } from "lucide-react";
 import { Logo } from "./Logo";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { useLanguage } from "@/lib/language";
@@ -156,7 +157,13 @@ export function Header() {
             : "bg-gradient-to-b from-black/60 to-transparent"
       }`}
     >
-      <div className="container-page flex h-16 items-center justify-between gap-4 sm:h-20">
+      {/*
+        `relative z-50` is load-bearing: the mobile overlay below is a child of
+        this header, so without an explicit stacking order this static bar
+        would paint *underneath* the z-40 overlay and the logo + close button
+        would disappear once the menu opened.
+      */}
+      <div className="container-page relative z-50 flex h-16 items-center justify-between gap-4 sm:h-20">
         <Link
           href="/"
           aria-label="Queen's Kebab home"
@@ -210,25 +217,28 @@ export function Header() {
           </Link>
           <button
             type="button"
-            aria-label="Toggle menu"
+            aria-label={
+              open
+                ? t({ cs: "Zavřít menu", en: "Close menu" })
+                : t({ cs: "Otevřít menu", en: "Open menu" })
+            }
             aria-expanded={open}
             aria-controls="mobile-menu"
             onClick={() => setOpen((v) => !v)}
-            className="grid h-10 w-10 place-items-center rounded-full border border-white/10 bg-white/5 lg:hidden"
+            className={`grid h-11 w-11 place-items-center rounded-full border transition lg:hidden ${
+              open
+                ? "border-white/25 bg-white/10 text-white"
+                : "border-white/10 bg-white/5 text-white"
+            }`}
           >
-            <span className="sr-only">Menu</span>
-            <div className="relative h-3 w-5">
-              <span
-                className={`absolute left-0 top-0 h-0.5 w-5 bg-white transition ${
-                  open ? "translate-y-[5px] rotate-45" : ""
-                }`}
-              />
-              <span
-                className={`absolute left-0 top-2.5 h-0.5 w-5 bg-white transition ${
-                  open ? "-translate-y-[5px] -rotate-45" : ""
-                }`}
-              />
-            </div>
+            {open ? (
+              <X className="h-5 w-5" strokeWidth={2.25} />
+            ) : (
+              <div className="relative h-3 w-5">
+                <span className="absolute left-0 top-0 h-0.5 w-5 bg-white" />
+                <span className="absolute left-0 top-2.5 h-0.5 w-5 bg-white" />
+              </div>
+            )}
           </button>
         </div>
       </div>
@@ -247,7 +257,7 @@ export function Header() {
           open ? "visible opacity-100" : "invisible opacity-0"
         }`}
       >
-        <div className="container-page flex flex-col gap-1 py-6">
+        <div className="container-page flex min-h-full flex-col gap-2 py-8">
           {navItems.map((item) => {
             const isActive = active === item.id;
             return (
@@ -255,7 +265,7 @@ export function Header() {
                 key={item.id}
                 href={hrefFor(item.hash)}
                 onClick={(e) => handleNavClick(e, item)}
-                className={`flex items-center justify-between rounded-2xl px-4 py-3 text-base font-medium transition ${
+                className={`flex items-center justify-between rounded-2xl px-4 py-4 text-lg font-medium transition ${
                   isActive
                     ? "bg-brand-red/15 text-white"
                     : "text-white/85 hover:bg-white/5"
@@ -268,7 +278,9 @@ export function Header() {
               </Link>
             );
           })}
-          <div className="mt-4 flex items-center justify-between gap-3 border-t border-white/5 pt-4">
+          {/* `mt-auto` pins the controls to the bottom of the overlay and
+              keeps a clear gap below the last nav item on tall screens. */}
+          <div className="mt-auto flex items-center justify-between gap-3 border-t border-white/5 pt-6">
             <LanguageSwitcher />
             <Link
               href={hrefFor("#order")}
