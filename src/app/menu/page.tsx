@@ -21,11 +21,11 @@ export default function MenuPage() {
   return (
     <main className="bg-ink-950">
       <Header />
-      <div className="pt-24 sm:pt-32">
-        <Suspense fallback={null}>
-          <FullMenu />
-        </Suspense>
-      </div>
+      {/* No top padding here — the menu hero carries its own, so its
+          background photo can run all the way up behind the fixed header. */}
+      <Suspense fallback={null}>
+        <FullMenu />
+      </Suspense>
       <Footer />
     </main>
   );

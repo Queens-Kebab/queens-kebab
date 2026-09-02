@@ -127,10 +127,10 @@ export const translations = {
         },
       },
       {
-        title: { cs: "Vege i halal", en: "Veggie & halal" },
+        title: { cs: "Vegetariánské možnosti", en: "Vegetarian options" },
         body: {
-          cs: "Falafel, halloumi, vegetariánské volby a halal maso.",
-          en: "Falafel, halloumi, veggie options and halal meat.",
+          cs: "Falafel, halloumi a další vegetariánské volby.",
+          en: "Falafel, halloumi and other vegetarian choices.",
         },
       },
     ],
@@ -163,7 +163,6 @@ export const translations = {
     spicy: { cs: "Pikantní", en: "Spicy" },
     vegetarian: { cs: "Vegetariánské", en: "Vegetarian" },
     new: { cs: "Novinka", en: "New" },
-    halal: { cs: "Halal", en: "Halal" },
     dessert: { cs: "Dezert", en: "Dessert" },
     drink: { cs: "Nápoj", en: "Drink" },
   },

@@ -30,7 +30,6 @@ export type MenuTag =
   | "spicy"
   | "vegetarian"
   | "new"
-  | "halal"
   | "dessert"
   | "drink";
 

@@ -35,13 +35,16 @@ const TAG_STYLE: Record<MenuTag, string> = {
   spicy: "bg-orange-500/20 text-orange-300 border border-orange-400/30",
   vegetarian: "bg-emerald-500/15 text-emerald-300 border border-emerald-400/30",
   new: "bg-brand-gold/20 text-brand-cream border border-brand-gold/40",
-  halal: "bg-white/10 text-white/80 border border-white/15",
   dessert: "bg-pink-500/15 text-pink-200 border border-pink-400/30",
   drink: "bg-sky-500/15 text-sky-200 border border-sky-400/30",
 };
 
-/** Tags hidden from the UI (kept in data, just not shown on cards). */
-const HIDDEN_TAGS: ReadonlySet<MenuTag> = new Set<MenuTag>(["halal"]);
+/**
+ * Tags kept in the data but not rendered on cards. Empty right now — the
+ * "halal" tag was removed entirely (the meat is not halal), so there is no
+ * way for that badge to reappear.
+ */
+const HIDDEN_TAGS: ReadonlySet<MenuTag> = new Set<MenuTag>();
 
 export function DishCard({
   item,
