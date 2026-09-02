@@ -142,18 +142,21 @@ export function FullMenu() {
           Two neutral black gradients, no flat scrim — the photo is never
           covered by a single heavy layer.
 
-          1. Horizontal: solid ink behind the copy on the left, easing off to
-             the right so the food stays clearly visible. It only reaches full
-             transparency from `sm` up — on phones the headline wraps across
-             the whole width, so the right end would otherwise sit on the
-             bright rice at ~1.7:1 contrast. Keeping a floor there holds every
-             line above 4.5:1 while the photo still reads through.
+          1. Horizontal: an even 70% veil across the text column, then a fade
+             to the right. It is deliberately NOT opaque on the left — the
+             photo is dark there anyway (counter and steel bowl), so 70% still
+             clears 5:1 against white while letting the image read through.
+             The binding constraint is actually the *right* end of the
+             headline, which sits over the bright rice; that is why the veil
+             stays flat to the midpoint instead of fading immediately, and why
+             it only reaches full transparency from `sm` up (on phones the
+             headline wraps across the whole width).
           2. Vertical: only the lower half fades up to solid ink, which blends
              the band into the page below without touching the top of the photo.
         */}
         <div
           aria-hidden
-          className="absolute inset-0 -z-10 bg-gradient-to-r from-ink-950 via-ink-950/85 to-ink-950/50 sm:via-ink-950/75 sm:to-transparent"
+          className="absolute inset-0 -z-10 bg-gradient-to-r from-ink-950/70 via-ink-950/70 to-ink-950/55 sm:to-transparent"
         />
         <div
           aria-hidden
