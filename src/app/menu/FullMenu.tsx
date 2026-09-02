@@ -138,20 +138,26 @@ export function FullMenu() {
           sizes="100vw"
           className="-z-10 object-cover object-center"
         />
-        {/* Left-weighted scrim: solid behind the copy, opening up on the
-            right so the photo stays visible. */}
+        {/*
+          Two neutral black gradients, no flat scrim — the photo is never
+          covered by a single heavy layer.
+
+          1. Horizontal: solid ink behind the copy on the left, easing off to
+             the right so the food stays clearly visible. It only reaches full
+             transparency from `sm` up — on phones the headline wraps across
+             the whole width, so the right end would otherwise sit on the
+             bright rice at ~1.7:1 contrast. Keeping a floor there holds every
+             line above 4.5:1 while the photo still reads through.
+          2. Vertical: only the lower half fades up to solid ink, which blends
+             the band into the page below without touching the top of the photo.
+        */}
         <div
           aria-hidden
-          className="absolute inset-0 -z-10 bg-gradient-to-r from-ink-950 via-ink-950/85 to-ink-950/45"
+          className="absolute inset-0 -z-10 bg-gradient-to-r from-ink-950 via-ink-950/85 to-ink-950/50 sm:via-ink-950/75 sm:to-transparent"
         />
-        {/* Vertical blend into the page + a subtle brand-red wash. */}
         <div
           aria-hidden
-          className="absolute inset-0 -z-10 bg-gradient-to-t from-ink-950 via-ink-950/40 to-ink-950/70"
-        />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -left-32 -top-24 -z-10 h-[420px] w-[420px] rounded-full bg-brand-red/20 blur-[120px]"
+          className="absolute inset-0 -z-10 bg-gradient-to-t from-ink-950 via-transparent to-transparent"
         />
 
         <div className="container-page">
